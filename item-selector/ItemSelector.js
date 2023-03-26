@@ -29,7 +29,7 @@ class ItemSelector {
 	constructor(listDisp, listData, limit, options) {
 		this.unselectedDisp = [...listDisp];
 		this.unselectedData = [...listData];
-		this.#listUnique = Array.from({length: listData.length}, (_, i) => i + 1)
+		this.#listUnique = Array.from({length: listData.length}, (_, i) => i + 1);
 		this.limit = limit;
 		this.options = options;
 		
@@ -93,7 +93,7 @@ class ItemSelector {
 			
 			// Case: 'other' item was slected and the user will be prompted for an input
 			if (item === ItemSelector.#otherPlaceholder) {
-				itemDisp = await tp.system.prompt(`Enter the name of ${itemTypeArticle} ${tp.user.formatOrdinal(i + iDisplayOffset)} ${itemType}`);
+				itemDisp = await tp.system.prompt(`Enter the name of ${itemTypeArticle} ${tp.user.FormatOrdinal(i + iDisplayOffset)} ${itemType}`);
 				itemData = itemDisp;
 			} 
 			// Case: A regular, non-control item was selected
@@ -163,17 +163,7 @@ class ItemSelector {
 	joinWithCount(sep = ', ', outFormat = (count, name) => `${count}x ${name}`) {
 		var cardCountList = [];
 		for (let i = 0; i < this.selectedData.length; ++i) {
-			var name;
-			if (this.selectedData[i].name !== undefined) {
-				// Use the name parameter if defined
-				name = this.selectedData[i].name;
-			} else if (Array.isArray(this.selectedData[i])) {
-				// Assume the first element of a data list is the name
-				name = this.selectedData[i][0];
-			} else {
-				// Otherwise, use the sring representation of the object
-				name = this.selectedData[i];
-			}
+			var name = this.#getKeyOrDefault(this.selectedData[i], 'name');
 			const count = this.itemCountList[i];
 			
 			cardCountList.push(outFormat(count, name));
@@ -186,6 +176,14 @@ class ItemSelector {
 		return this.options[opt] !== undefined ? this.options[opt] : this.#defaultOptions[opt];
 	}
 	
+	#getKeyOrDefault(itemData, key) {
+		switch (key) {
+			case 'name': 
+				return itemData[key] !== undefined ? itemData.name : Array.isArray(itemData) ? itemData[0] : itemData;
+		}
+		
+	}
+	
 	/**
 	* Helper function for invoking the Templater Suggester
 	* @param  {Number} i		       The number of the item.
@@ -194,7 +192,7 @@ class ItemSelector {
 	* @return {Object} 			       Returns the item selected by tp.system.suggester.
 	*/
 	async #queryItem(i, itemType, itemTypeArticle = "the") {
-		return tp.system.suggester(this.unselectedDisp, this.#listUnique, false, `Select ${itemTypeArticle} ${tp.user.formatOrdinal(i)} ${itemType}`);
+		return tp.system.suggester(this.unselectedDisp, this.#listUnique, false, `Select ${itemTypeArticle} ${tp.user.FormatOrdinal(i)} ${itemType}`);
 	}
 }
 

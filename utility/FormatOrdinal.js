@@ -1,6 +1,6 @@
 // source: https://www.freecodecamp.org/news/format-dates-with-ordinal-number-suffixes-javascript/
 
-function formatOrdinal(i) {
+function FormatOrdinal(i) {
   // 11, 12, 13 do not follow the usual pattern, so they are checked first
   if ((i % 100) > 3 && (i % 100) < 21){
     return `${i}th`;
@@ -20,4 +20,4 @@ function formatOrdinal(i) {
   }
 }
 
-module.exports = formatOrdinal;
+module.exports = FormatOrdinal;
