@@ -1,8 +1,8 @@
 ---
 tags: 2023/03-Mar
 ---
-**Current Version:** 0.3
-**Last Updated:** 2023-03-04
+**Current Version:** 0.3  
+**Last Updated:** 2023-03-04  
 
 ## Usage
 `tp.user.ItemSelector.select(listDisp: string[], listData: string[] = listDisp, limit Number = Number.MAX_SAFE_INTEGER, options: Object = {})`
@@ -39,6 +39,16 @@ Each item in the options object is optional. Any that are omitted will use the d
 | askForCount       | bool   | `false`          | If enabled, will ask for an integer number of copies for each item. If the count is blank, 1 is used. If the count is an invalid character (like a letter), the prompt is retried. |
 | keepSelectedItems | bool   | `false`          | If enabled, selected items will not be removed from the list allowing mutiple selections                                                                                           |
 | countOffset       | Number | `0`              | 0 based. Used to offset the iteration count, effectively starting at a higher number                                                                                               |
+| countName         | string | `copies`         | Modifies the display text when asking for count, "enter the number of {countName} of ...". Can be used to enter point values or other numbers.                                     |
+
+### Per-Item Keys
+If the items within the `listData` parameters are `Objects`, they can have specific parameters assigned to them that will modify how the Selector handles them. `data.key = value` | `data = {x: y, key: value}`
+
+| Key              | Type   | Description                                                                         |
+| ---------------- | ------ | ----------------------------------------------------------------------------------- |
+| name             | string | If an object needs to have it's name displayed, it will use this name               |
+| keepWhenSelected | bool   | overrides `keepSelectedItem` option when deciding to keep or remove a selected item |
+| askForCount      | bool   | overrides global `askForCount` when deciding to querying item counts                |
 
 ### Usage
 ```js
@@ -60,6 +70,7 @@ await tp.user.ItemSelector.select(list_a, list_b, 0, options)
 // It's also possible to create the object duing the function call
 await tp.user.ItemSelector.select(list_a, list_b, 0, {showFinished:false})
 ```
+
 
 ## joinWithCount()
 Once the selector has been created, you can get a formatted list of the data items with their count. 
@@ -159,6 +170,21 @@ var resultCount = result.joinWithCount(", ", (count, name) => `${name} (x${count
 // returns "a (x2), b (x10)"
 ```
 
+### Per-Item-Flags
+```js
+var display_list = ["Balloon 1", "Balloon 2", "Balloon 3"];
+var data_list = [
+	{name: "Red Baloon 1", askForCount: true},
+	{name: "Green Baloon 2", keepWhenSelected: true},
+	"Blue Baloon",
+];
+var options = {countName: "bundles of balloons"}
+
+var result = await tp.user.ItemSelector.select(display_list, data_list, 0, options);
+// The 1st item, the red balloon, will ask for number of bundles (count), but the others wont
+// The second item, the green balloon, can be selected multiple times, but the other's still only once
+
+```
 
 
 ## Changelog
@@ -178,5 +204,9 @@ initial
 - Added `joinWithCount()` — Will output a formatted string containing the name and count
 
 ### 0.4
-- Added `countOffset` — 0 based offset to increase the displayed index.
+- Added `countOffset` — 0 based offset to increase the displayed index
+- Added a new type of configuration. Now, if the `listData` list is made of objects, they can have specific keys associated with them which change the way the `ItemSelector` handles then when selected. 
+	- Currently supported: `[name, keepWhenSelected, askForCount]` 
+- Added `countName` — Modifies the display text when asking for count, "enter the number of {countName} of ..."
+	- Can be used to enter point values or other numbers
 
