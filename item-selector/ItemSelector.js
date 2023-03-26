@@ -174,17 +174,17 @@ class ItemSelector {
 	}
 	
 	#getOptionOrDefault(opt) {
-		return this.options[opt] !== undefined ? this.options[opt] : this.#defaultOptions[opt];
+		return this.options.hasOwnProperty(opt) ? this.options[opt] : this.#defaultOptions[opt];
 	}
 	
 	#getKeyOrDefault(itemData, key) {
 		switch (key) {
 			case 'name': 
-				return itemData[key] !== undefined ? itemData.name : Array.isArray(itemData) ? itemData[0] : itemData;
+				return itemData.hasOwnProperty(key) ? itemData.name : Array.isArray(itemData) ? itemData[0] : itemData;
 			case 'keepWhenSelected':
-				return itemData[key] !== undefined ? itemData.keepWhenSelected : this.#getOptionOrDefault('keepSelectedItems');
+				return itemData.hasOwnProperty(key) ? itemData.keepWhenSelected : this.#getOptionOrDefault('keepSelectedItems');
 			case 'askForCount':
-				return itemData[key] !== undefined ? itemData.askForCount : this.#getOptionOrDefault('askForCount');
+				return itemData.hasOwnProperty(key) ? itemData.askForCount : this.#getOptionOrDefault('askForCount');
 		}
 		
 	}
