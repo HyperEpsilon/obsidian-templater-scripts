@@ -23,6 +23,7 @@ class ItemSelector {
 		keepSelectedItems: false,
 		askForCount: false,
 		countOffset: 0,
+		countName: "copies"
 	};
 	
 	
@@ -81,8 +82,7 @@ class ItemSelector {
 		// Set up configuration options
 		const itemType = this.#getOptionOrDefault('itemType');
 		const itemTypeArticle = this.#getOptionOrDefault('itemTypeArticle');
-		const keepSelectedItems = this.#getOptionOrDefault('keepSelectedItems');
-		const askForCount = this.#getOptionOrDefault('askForCount');
+		const countName = this.#getOptionOrDefault('countName');	
 
 		var iDisplayOffset = this.#getOptionOrDefault('countOffset');
 		var i = 0;
@@ -103,9 +103,10 @@ class ItemSelector {
 				if (j >= 0) {
 					itemDisp = this.unselectedDisp[j];
 					itemData = this.unselectedData[j];
+					var keepItem = this.#getKeyOrDefault(itemData, 'keepWhenSelected');
 					
-					// Remove the selected item if keepSelectedItems is false
-					if (!keepSelectedItems) {
+					// Remove the selected item if specific$keepWhenSelected or globabl$keepSelectedItems is false
+					if (!keepItem) {
 						this.unselectedDisp.splice(j, 1);
 						this.unselectedData.splice(j, 1);
 						this.#listUnique.splice(j, 1)						
@@ -115,9 +116,9 @@ class ItemSelector {
 			
 			// Get the count of the item, default 1
 			var count;
-			if (askForCount) {
+			if (this.#getKeyOrDefault(itemData, 'askForCount')) {
 				var isInvalid = true;
-				var msg = `Enter the number of copies of '${itemDisp}'`;
+				var msg = `Enter the number of ${countName} of '${itemDisp}'`;
 				
 				// Loop until a valid number is entered, but 0 is the default
 				while (isInvalid) {
@@ -128,7 +129,7 @@ class ItemSelector {
 					} else {
 						count = Number.parseInt(count);
 						isInvalid = isNaN(count);
-						msg = `Enter the number of copies of '${itemDisp}' | Please enter a valid value`;						
+						msg = `Enter the number of ${countName} of '${itemDisp}' | Please enter a valid value`;						
 					}
 				}
 			} else {
@@ -180,6 +181,10 @@ class ItemSelector {
 		switch (key) {
 			case 'name': 
 				return itemData[key] !== undefined ? itemData.name : Array.isArray(itemData) ? itemData[0] : itemData;
+			case 'keepWhenSelected':
+				return itemData[key] !== undefined ? itemData.keepWhenSelected : this.#getOptionOrDefault('keepSelectedItems');
+			case 'askForCount':
+				return itemData[key] !== undefined ? itemData.askForCount : this.#getOptionOrDefault('askForCount');
 		}
 		
 	}
