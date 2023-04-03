@@ -93,7 +93,7 @@ class ItemSelector {
 			
 			// Case: 'other' item was slected and the user will be prompted for an input
 			if (item === ItemSelector.#otherPlaceholder) {
-				itemDisp = await tp.system.prompt(`Enter the name of ${itemTypeArticle} ${tp.user.FormatOrdinal(i + iDisplayOffset)} ${itemType}`);
+				itemDisp = await tp.system.prompt(`Enter the name of ${itemTypeArticle} ${tp.user.formatOrdinal(i + iDisplayOffset)} ${itemType}`);
 				itemData = itemDisp;
 			} 
 			// Case: A regular, non-control item was selected
@@ -197,7 +197,7 @@ class ItemSelector {
 	* @return {Object} 			       Returns the item selected by tp.system.suggester.
 	*/
 	async #queryItem(i, itemType, itemTypeArticle = "the") {
-		return tp.system.suggester(this.unselectedDisp, this.#listUnique, false, `Select ${itemTypeArticle} ${tp.user.FormatOrdinal(i)} ${itemType}`);
+		return tp.system.suggester(this.unselectedDisp, this.#listUnique, false, `Select ${itemTypeArticle} ${tp.user.formatOrdinal(i)} ${itemType}`);
 	}
 }
 
