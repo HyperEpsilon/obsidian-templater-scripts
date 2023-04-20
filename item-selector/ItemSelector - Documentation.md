@@ -1,8 +1,9 @@
 ---
 tags: 2023/03-Mar
+alias: "ItemSelector"
 ---
-**Current Version:** 0.3  
-**Last Updated:** 2023-03-04  
+**Current Version:** 0.4  
+**Last Updated:** 2023-04-20  
 
 ## Usage
 `tp.user.ItemSelector.select(listDisp: string[], listData: string[] = listDisp, limit Number = Number.MAX_SAFE_INTEGER, options: Object = {})`
@@ -40,6 +41,7 @@ Each item in the options object is optional. Any that are omitted will use the d
 | keepSelectedItems | bool   | `false`          | If enabled, selected items will not be removed from the list allowing mutiple selections                                                                                           |
 | countOffset       | Number | `0`              | 0 based. Used to offset the iteration count, effectively starting at a higher number                                                                                               |
 | countName         | string | `copies`         | Modifies the display text when asking for count, "enter the number of {countName} of ...". Can be used to enter point values or other numbers.                                     |
+| countShown        | bool   | `true`           | Controls the visibility of the count (1st, 2nd, …) in selector display                                                                                                             |
 
 ### Per-Item Keys
 If the items within the `listData` parameters are `Objects`, they can have specific parameters assigned to them that will modify how the Selector handles them. `data.key = value` | `data = {x: y, key: value}`
@@ -205,8 +207,11 @@ initial
 
 ### 0.4
 - Added `countOffset` — 0 based offset to increase the displayed index
-- Added a new type of configuration. Now, if the `listData` list is made of objects, they can have specific keys associated with them which change the way the `ItemSelector` handles then when selected. 
+- Added a new type of configuration. Now, if the `listData` list is made of objects, they can have specific per-item keys associated with them which change the way the `ItemSelector` handles them when selected. 
 	- Currently supported: `[name, keepWhenSelected, askForCount]` 
 - Added `countName` — Modifies the display text when asking for count, "enter the number of {countName} of ..."
 	- Can be used to enter point values or other numbers
+
+### 0.5
+- Added `countShown` — Allows the user to hide the count (1st, 2nd, …) in the display
 

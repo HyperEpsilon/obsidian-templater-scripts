@@ -23,7 +23,8 @@ class ItemSelector {
 		keepSelectedItems: false,
 		askForCount: false,
 		countOffset: 0,
-		countName: "copies"
+		countName: "copies",
+		countShown: true,
 	};
 	
 	
@@ -93,7 +94,7 @@ class ItemSelector {
 			
 			// Case: 'other' item was slected and the user will be prompted for an input
 			if (item === ItemSelector.#otherPlaceholder) {
-				itemDisp = await tp.system.prompt(`Enter the name of ${itemTypeArticle} ${tp.user.formatOrdinal(i + iDisplayOffset)} ${itemType}`);
+				itemDisp = await tp.system.prompt(`Enter the name of ${itemTypeArticle}${this.#getIndexDisplay(i + iDisplayOffset)} ${itemType}`);
 				itemData = itemDisp;
 			} 
 			// Case: A regular, non-control item was selected
@@ -189,6 +190,16 @@ class ItemSelector {
 		
 	}
 	
+	#getIndexDisplay(i) {
+		// 3 Cases, use i (and format), hide i, or use custom display (not yet implemented)
+		if (this.#getOptionOrDefault('countShown')) {
+			// TODO: Implement custom display
+			return " " + tp.user.formatOrdinal(i); // prepend a space because when count hidden, space shouldn't be visible
+		} else {
+			return "";
+		}
+	}
+	
 	/**
 	* Helper function for invoking the Templater Suggester
 	* @param  {Number} i		       The number of the item.
@@ -197,7 +208,7 @@ class ItemSelector {
 	* @return {Object} 			       Returns the item selected by tp.system.suggester.
 	*/
 	async #queryItem(i, itemType, itemTypeArticle = "the") {
-		return tp.system.suggester(this.unselectedDisp, this.#listUnique, false, `Select ${itemTypeArticle} ${tp.user.formatOrdinal(i)} ${itemType}`);
+		return tp.system.suggester(this.unselectedDisp, this.#listUnique, false, `Select ${itemTypeArticle}${this.#getIndexDisplay(i)} ${itemType}`);
 	}
 }
 
