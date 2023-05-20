@@ -25,6 +25,9 @@ class ItemSelector {
 		countOffset: 0,
 		countName: "copies",
 		countShown: true,
+		askForAttributes: false,
+		attributeList: [],
+		defaultAttribute: ['none', '', '']
 	};
 	
 	
@@ -39,6 +42,7 @@ class ItemSelector {
 		this.selectedData = [];
 		
 		this.itemCountList = []; // Contains the count for each selected item
+		this.itemAttributeList = []; // Contains the attributes for each selected item
 		this.totalItemCount = 0;
 		
 		// Save originals
@@ -137,10 +141,35 @@ class ItemSelector {
 				count = 1;
 			}
 			
+			// Get the attribute of the item
+			var attribute;
+			if (this.#getKeyOrDefault(itemData, 'askForAttributes')) {
+				const attrList = this.#getKeyOrDefault(itemData, 'attributeList');
+				const attrNames = attrList.map(k => k[0]);
+				
+				// Check if there are any items in the attribute list
+				if (attrList.length > 0) {
+					attribute = await tp.system.suggester(attrNames, attrList, false, `Select an attribute for '${itemDisp}'`);
+					// Backup if the suggestor is canceled
+					if (attribute === null) {
+						new Notice(`Default attribute selected for '${itemDisp}'`);
+						attribute = this.#getKeyOrDefault(itemData, 'defaultAttribute');
+					}
+				} else {
+					new Notice(`There are no Attributes available for '${itemDisp}'\nPlease check your options`);
+					attribute = this.#getKeyOrDefault(itemData, 'defaultAttribute');
+				}
+				
+			} else {
+				attribute = this.#getKeyOrDefault(itemData, 'defaultAttribute');
+			}
+			
+			
 			// Add the selected item to the output list
 			this.selectedDisp.push(itemDisp);
 			this.selectedData.push(itemData);
 			this.itemCountList.push(count);
+			this.itemAttributeList.push(attribute);
 			
 			// Break if limit reached
 			if (i >= this.limit) {
@@ -165,13 +194,26 @@ class ItemSelector {
 	joinWithCount(sep = ', ', outFormat = (count, name) => `${count}x ${name}`) {
 		var cardCountList = [];
 		for (let i = 0; i < this.selectedData.length; ++i) {
-			var name = this.#getKeyOrDefault(this.selectedData[i], 'name');
+			const name = this.#getKeyOrDefault(this.selectedData[i], 'name');
 			const count = this.itemCountList[i];
 			
 			cardCountList.push(outFormat(count, name));
 		}
 		
 		return cardCountList.join(sep);
+	}
+	
+	joinWithAttribute(sep = ', ', outFormat = (count, name, attribute) => `${attribute[1]}${name}${attribute[2]}`) {
+		var outCardList = [];
+		for (let i = 0; i < this.selectedData.length; ++i) {
+			const name = this.#getKeyOrDefault(this.selectedData[i], 'name');
+			const count = this.itemCountList[i];
+			const attribute = this.itemAttributeList[i]; // Format is [NAME, FRONT_ATTR, BACK_ATTR]
+			
+			outCardList.push(outFormat(count, name, attribute));
+		}
+		
+		return outCardList.join(sep);
 	}
 	
 	#getOptionOrDefault(opt) {
@@ -186,6 +228,12 @@ class ItemSelector {
 				return itemData.hasOwnProperty(key) ? itemData.keepWhenSelected : this.#getOptionOrDefault('keepSelectedItems');
 			case 'askForCount':
 				return itemData.hasOwnProperty(key) ? itemData.askForCount : this.#getOptionOrDefault('askForCount');
+			case 'askForAttributes':
+				return itemData.hasOwnProperty(key) ? itemData.askForAttributes : this.#getOptionOrDefault('askForAttributes');
+			case 'attributeList':
+				return itemData.hasOwnProperty(key) ? itemData.attributeList : this.#getOptionOrDefault('attributeList');
+			case 'defaultAttribute':
+				return itemData.hasOwnProperty(key) ? itemData.defaultAttribute : this.#getOptionOrDefault('defaultAttribute');
 		}
 		
 	}

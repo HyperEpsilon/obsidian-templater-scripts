@@ -25,32 +25,40 @@ Once the selector has been run, you can access the following lists in the form `
 - `originalData`: A copy of the original `listData`.
 - `itemCountList`: A list containing the count of each item. If `askForCount` if false, each item has count 1.
 - `totalItemCount`: The sum of all item counts. If `askForCount` if false, will just return the total length of the list.
+- `itemAttributeList`: A list containing the attribute of each item. If `askForAttribute` is false, each item has the `defaultAttribute`.
 
 ## Options object
 Each item in the options object is optional. Any that are omitted will use the default value. Order does not matter.
 
-| Name              | Type   | Default          | Notes                                                                                                                                                                              |
-| ----------------- | ------ | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| finishedName      | string | `"​== Done =="`  | Sets the display text for the 'finished' item                                                                                                                                      |
-| showFinished      | bool   | `true`           | If true, will display an option to finalize the list selection                                                                                                                     |
-| otherName         | string | `"​== Other =="` | Sets the display text for the 'other' item                                                                                                                                         |
-| showOther         | bool   | `false`          | If enabled, will display an option to enter an item not on the list                                                                                                                |
-| itemType          | string | `"item"`         | The item type displayed in the selector message                                                                                                                                    |
-| itemTypeArticle   | string | `"the"`          | Change the article of the selector test. Default is 'the', though proper nouns are usable with an `'s`                                                                             |
-| askForCount       | bool   | `false`          | If enabled, will ask for an integer number of copies for each item. If the count is blank, 1 is used. If the count is an invalid character (like a letter), the prompt is retried. |
-| keepSelectedItems | bool   | `false`          | If enabled, selected items will not be removed from the list allowing mutiple selections                                                                                           |
-| countOffset       | Number | `0`              | 0 based. Used to offset the iteration count, effectively starting at a higher number                                                                                               |
-| countName         | string | `copies`         | Modifies the display text when asking for count, "enter the number of {countName} of ...". Can be used to enter point values or other numbers.                                     |
-| countShown        | bool   | `true`           | Controls the visibility of the count (1st, 2nd, …) in selector display                                                                                                             |
+| Name              | Type           | Default            | Notes                                                                                                                                                                                      |
+| ----------------- | -------------- | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| finishedName      | string         | `"​== Done =="`    | Sets the display text for the 'finished' item                                                                                                                                              |
+| showFinished      | bool           | `true`             | If true, will display an option to finalize the list selection                                                                                                                             |
+| otherName         | string         | `"​== Other =="`   | Sets the display text for the 'other' item                                                                                                                                                 |
+| showOther         | bool           | `false`            | If enabled, will display an option to enter an item not on the list                                                                                                                        |
+| itemType          | string         | `"item"`           | The item type displayed in the selector message                                                                                                                                            |
+| itemTypeArticle   | string         | `"the"`            | Change the article of the selector test. Default is 'the', though proper nouns are usable with an `'s`                                                                                     |
+| askForCount       | bool           | `false`            | If enabled, will ask for an integer number of copies for each item. If the count is blank, 1 is used. If the count is an invalid character (like a letter), the prompt is retried.         |
+| keepSelectedItems | bool           | `false`            | If enabled, selected items will not be removed from the list allowing mutiple selections                                                                                                   |
+| countOffset       | Number         | `0`                | 0 based. Used to offset the iteration count, effectively starting at a higher number                                                                                                       |
+| countName         | string         | `copies`           | Modifies the display text when asking for count, "enter the number of {countName} of ...". Can be used to enter point values or other numbers.                                             |
+| countShown        | bool           | `true`             | Controls the visibility of the count (1st, 2nd, …) in selector display                                                                                                                     |
+| askForAttributes  | bool           | `false`            | If enabled, will prompt for attributes that will surround each item                                                                                                                        |
+| attributeList     | List of 3-List | `[]`               | A list of 3-list objects, formatted as `[name, attrFront, attrBack]`. The name will be displayed in the list, and the other two will wrap the object display name when formatted printing. |
+| defaultAttribute  | 3-List         | `['none', '', '']` | If an item is *not* queried for an attribute, this is used instead                                                                                                                         |
+
 
 ### Per-Item Keys
-If the items within the `listData` parameters are `Objects`, they can have specific parameters assigned to them that will modify how the Selector handles them. `data.key = value` | `data = {x: y, key: value}`
+If the items within the `listData` parameter are `Objects`, they can have specific parameters assigned to them that will modify how the Selector handles them. `data.key = value` | `data = {x: y, key: value}`
 
-| Key              | Type   | Description                                                                         |
-| ---------------- | ------ | ----------------------------------------------------------------------------------- |
-| name             | string | If an object needs to have it's name displayed, it will use this name               |
-| keepWhenSelected | bool   | overrides `keepSelectedItem` option when deciding to keep or remove a selected item |
-| askForCount      | bool   | overrides global `askForCount` when deciding to querying item counts                |
+| Key              | Type           | Description                                                                         |
+| ---------------- | -------------- | ----------------------------------------------------------------------------------- |
+| name             | string         | If an object needs to have it's name displayed, it will use this name               |
+| keepWhenSelected | bool           | overrides `keepSelectedItem` option when deciding to keep or remove a selected item |
+| askForCount      | bool           | overrides global `askForCount` when deciding to querying item counts                |
+| askForAttributes | bool           | overrides global `askForAttributes` when deciding to ask for attribute selection.   |
+| attributeList    | List of 3-List | overrides `attributeList` if object is queried for attributes.                      |
+| defaultAttribute | 3-List         | overrides `defaultAttribute` if an object is not queried for attributes             |
 
 ### Usage
 ```js
@@ -69,7 +77,7 @@ await tp.user.ItemSelector.select(list_a, list_b, 0, options)
 var options = {showFinished: false, showOther: true, otherName: "SOMETHING DIFFERENT"};
 await tp.user.ItemSelector.select(list_a, list_b, 0, options)
 
-// It's also possible to create the object duing the function call
+// It's also possible to create the options object duing the function call
 await tp.user.ItemSelector.select(list_a, list_b, 0, {showFinished:false})
 ```
 
@@ -77,7 +85,7 @@ await tp.user.ItemSelector.select(list_a, list_b, 0, {showFinished:false})
 ## joinWithCount()
 Once the selector has been created, you can get a formatted list of the data items with their count. 
 **NOTE:** If `listData` is a list of lists, then the first item is assumed to hold the name.
-**Note 2:** If `listData` is a list of object with the `name` parameter defined, that is used
+**NOTE 2:** If `listData` is a list of object with the `name` parameter defined, that is used
 
 ``selector.joinWithCount(sep = ', ', outFormat = (count, name) => ${count}x ${name}`)``
 
@@ -89,6 +97,21 @@ Once the selector has been created, you can get a formatted list of the data ite
 	- e.g. `(count, name) => ${name} (x${count})` will output `name (x#)` 
 
 See [[#Item and count]] for more in-depth examples
+
+## joinWithAttribute()
+Once the selector has been created, you can get a formatted list of the data items wrapped in their attributes.
+
+``selector.joinWithAttribute(sep = ', ', outFormat = (count, name, attribute) => `${attribute[1]}${name}${attribute[2]}`)``
+
+### Arguments
+- `sep`: The separator used to join the final list. Default is `', '`
+- `outFormat`: The function used to format the name with the attributes. Default will output `{attrFront}name{attrBack}`
+	- In order to play with this, you need to pass a function using arrow notation
+	- The first part, `(count, name, attribute) =>` must be the same, but the right half can be changed
+	- `count` is deliberately left out of the default format, but exists as a customization option
+	- e.g. ``(count, name, attribute) => `${count}x {attribute[1]}${name}${attribute[2]}`)`` will output `#x {attrFront}name{attrBack}` 
+
+See [[#Attribute formatted Items]] for more in-depth examples
 
 ## Examples
 ### Basic usage
@@ -188,6 +211,8 @@ var result = await tp.user.ItemSelector.select(display_list, data_list, 0, optio
 
 ```
 
+### Attribute formatted Items
+
 
 ## Changelog
 ### 0.1
@@ -214,4 +239,10 @@ initial
 
 ### 0.5
 - Added `countShown` — Allows the user to hide the count (1st, 2nd, …) in the display
+- Added Attributes — Formatting that can be wrapped around individual items
+	- Format: `[name, attrFront, attrBack]` 
+	- `askForAttributes`, `defaultAttribute`, `AttributeList` and respective per-item-keys
+	- `joinWithAttribute()` — Will output a string with the attributes wrapped around the items
+	- Default value is blank: `['none', '', '']` 
+
 
