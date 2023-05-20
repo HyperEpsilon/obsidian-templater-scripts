@@ -109,7 +109,7 @@ Once the selector has been created, you can get a formatted list of the data ite
 	- In order to play with this, you need to pass a function using arrow notation
 	- The first part, `(count, name, attribute) =>` must be the same, but the right half can be changed
 	- `count` is deliberately left out of the default format, but exists as a customization option
-	- e.g. ``(count, name, attribute) => `${count}x {attribute[1]}${name}${attribute[2]}`)`` will output `#x {attrFront}name{attrBack}` 
+	- e.g. ``(count, name, attribute) => `${count}x ${attribute[1]}${name}${attribute[2]}` `` will output `#x {attrFront}name{attrBack}` 
 
 See [[#Attribute formatted Items]] for more in-depth examples
 
@@ -182,6 +182,7 @@ var result = await tp.user.ItemSelector.select(list_a, list_b, 0, options);
 // Assume the user selects the first and second item, and has a count of 2 and 10 respectivly
 // results.selectedData = ['a', 'b']
 // results.itemCountList = [2, 10]
+// results.totalItemCount = 12
 
 var resultCount = result.joinWithCount();
 // returns: "2x a, 10x b"
@@ -212,6 +213,24 @@ var result = await tp.user.ItemSelector.select(display_list, data_list, 0, optio
 ```
 
 ### Attribute formatted Items
+Example of getting the items in a formatted list with their 
+```js
+var list_a = [1, 2, 3, 4, 5];
+var list_b = ['a', 'b', 'c', 'd', 'e'];
+var options = {askForAttributes: true, attributeList: [["Bold", "**", "**"], ["Italics", "*", "*"]]}; 
+
+var result = await tp.user.ItemSelector.select(list_a, list_b, 0, options);
+// Assume the user selects the first and second item, and chooses bold both times
+// results.selectedData = ['a', 'b']
+// results.itemAttributeList = [["Bold", "**", "**"], ["Bold", "**", "**"]]
+
+var resultFormatted = result.joinWithAttribute();
+// returns: "**a**, **b**";
+
+// Item count can be added with customization
+var resultFormatted = result.joinWithAttribute(", ", (count, name, attribute) => `${count}x ${attribute[1]}${name}${attribute[2]}`)
+// returns "1x **a**, 1x **b**"
+```
 
 
 ## Changelog
