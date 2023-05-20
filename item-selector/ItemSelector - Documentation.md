@@ -2,8 +2,8 @@
 tags: 2023/03-Mar
 alias: "ItemSelector"
 ---
-**Current Version:** 0.4  
-**Last Updated:** 2023-04-20  
+**Current Version:** 0.5  
+**Last Updated:** 2023-05-20  
 
 ## Usage
 `tp.user.ItemSelector.select(listDisp: string[], listData: string[] = listDisp, limit Number = Number.MAX_SAFE_INTEGER, options: Object = {})`
