@@ -234,29 +234,29 @@ var resultFormatted = result.joinWithAttribute(", ", (count, name, attribute) =>
 
 
 ## Changelog
-### 0.1
+### 0.1.0
 initial
 
-### 0.2
+### 0.2.0
 - Added `itemTypePrefix`
 - Changed `unusedDisp` -> `unselectedDisp`
 - Changed `unusedData` -> `unselectedData`
 
-### 0.3
+### 0.3.0
 - Added `askForCount` — Allows the user to select a quantity for each item selected
 - Added `keepSelectedItems` — Does not remove the selected item from the list
 
 ### 0.3.1
 - Added `joinWithCount()` — Will output a formatted string containing the name and count
 
-### 0.4
+### 0.4.0
 - Added `countOffset` — 0 based offset to increase the displayed index
 - Added a new type of configuration. Now, if the `listData` list is made of objects, they can have specific per-item keys associated with them which change the way the `ItemSelector` handles them when selected. 
 	- Currently supported: `[name, keepWhenSelected, askForCount]` 
 - Added `countName` — Modifies the display text when asking for count, "enter the number of {countName} of ..."
 	- Can be used to enter point values or other numbers
 
-### 0.5
+### 0.5.0
 - Added `countShown` — Allows the user to hide the count (1st, 2nd, …) in the display
 - Added Attributes — Formatting that can be wrapped around individual items
 	- Format: `[name, attrFront, attrBack]` 
