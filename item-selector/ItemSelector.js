@@ -91,12 +91,12 @@ class ItemSelector {
 		const itemTypeArticle = this.#getOptionOrDefault('itemTypeArticle');
 		const countName = this.#getOptionOrDefault('countName');	
 
-		var iDisplayOffset = this.#getOptionOrDefault('countOffset');
-		var i = 0;
-		var item = await this.#queryItem(++i + iDisplayOffset, itemType, itemTypeArticle);
+		let iDisplayOffset = this.#getOptionOrDefault('countOffset');
+		let i = 0;
+		let item = await this.#queryItem(++i + iDisplayOffset, itemType, itemTypeArticle);
 		while (item) {
-			var itemDisp;
-			var itemData;
+			let itemDisp;
+			let itemData;
 			
 			// Case: 'other' item was slected and the user will be prompted for an input
 			if (item === ItemSelector.#otherPlaceholder) {
@@ -106,11 +106,11 @@ class ItemSelector {
 			// Case: A regular, non-control item was selected
 			else {
 				// Get index of selected item
-				var j = this.#listUnique.indexOf(item);
+				let j = this.#listUnique.indexOf(item);
 				if (j >= 0) {
 					itemDisp = this.unselectedDisp[j];
 					itemData = this.unselectedData[j];
-					var keepItem = this.#getKeyOrDefault(itemData, 'keepWhenSelected');
+					let keepItem = this.#getKeyOrDefault(itemData, 'keepWhenSelected');
 					
 					// Remove the selected item if specific$keepWhenSelected or globabl$keepSelectedItems is false
 					if (!keepItem) {
@@ -122,10 +122,10 @@ class ItemSelector {
 			}
 			
 			// Get the count of the item, default 1
-			var count;
+			let count;
 			if (this.#getKeyOrDefault(itemData, 'askForCount')) {
-				var isInvalid = true;
-				var msg = `Enter the number of ${countName} of '${itemDisp}'`;
+				let isInvalid = true;
+				let msg = `Enter the number of ${countName} of '${itemDisp}'`;
 				
 				// Loop until a valid number is entered, but 0 is the default
 				while (isInvalid) {
@@ -144,7 +144,7 @@ class ItemSelector {
 			}
 			
 			// Get the attribute of the item
-			var attribute;
+			let attribute;
 			if (this.#getKeyOrDefault(itemData, 'askForAttributes')) {
 				const attrList = this.#getKeyOrDefault(itemData, 'attributeList');
 				const attrNames = attrList.map(k => k[0]);
@@ -196,7 +196,7 @@ class ItemSelector {
 	}
 	
 	joinWithCount(sep = ', ', outFormat = (count, name) => `${count}x ${name}`) {
-		var cardCountList = [];
+		let cardCountList = [];
 		for (let i = 0; i < this.selectedData.length; ++i) {
 			const name = this.#getKeyOrDefault(this.selectedData[i], 'name');
 			const count = this.itemCountList[i];
@@ -208,7 +208,7 @@ class ItemSelector {
 	}
 	
 	joinWithAttribute(sep = ', ', outFormat = (count, name, attribute) => `${attribute[1]}${name}${attribute[2]}`) {
-		var outCardList = [];
+		let outCardList = [];
 		for (let i = 0; i < this.selectedData.length; ++i) {
 			const name = this.#getKeyOrDefault(this.selectedData[i], 'name');
 			const count = this.itemCountList[i];

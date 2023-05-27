@@ -7,7 +7,7 @@ function formatOrdinal(i) {
   }
   
   // Extract the final digit and use that to determin ordinal
-  var num = i % 10;
+  let num = i % 10;
   switch(num) {
     case 1:
       return `${i}st`;
