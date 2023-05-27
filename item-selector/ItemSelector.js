@@ -27,7 +27,9 @@ class ItemSelector {
 		countShown: true,
 		askForAttributes: false,
 		attributeList: [],
-		defaultAttribute: ['none', '', '']
+		defaultAttribute: ['none', '', ''],
+		attributeName: "attribute",
+		attributeArticle: "an",
 	};
 	
 	
@@ -148,18 +150,19 @@ class ItemSelector {
 			if (this.#getKeyOrDefault(itemData, 'askForAttributes')) {
 				const attrList = this.#getKeyOrDefault(itemData, 'attributeList');
 				const attrNames = attrList.map(k => k[0]);
-				
+				const attributeName = this.#getOptionOrDefault('attributeName');
+				const attributeArticle = this.#getOptionOrDefault('attributeArticle');
 				
 				// Check if there are any items in the attribute list
 				if (attrList.length > 0) {
-					attribute = await tp.system.suggester(attrNames, attrList, false, `Select an attribute for '${itemDisp}'`);
+					attribute = await tp.system.suggester(attrNames, attrList, false, `Select ${attributeArticle} ${attributeName} for '${itemDisp}'`);
 					// Backup if the suggestor is canceled
 					if (attribute === null) {
-						new Notice(`Default attribute selected for '${itemDisp}'`);
+						new Notice(`Default ${attributeName} selected for '${itemDisp}'`);
 						attribute = this.#getKeyOrDefault(itemData, 'defaultAttribute');
 					}
 				} else {
-					new Notice(`There are no attributes available for '${itemDisp}'\nPlease check your options`);
+					new Notice(`There are no {attributeName}s available for '${itemDisp}'\nPlease check your options`);
 					attribute = this.#getKeyOrDefault(itemData, 'defaultAttribute');
 				}
 				

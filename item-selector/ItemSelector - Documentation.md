@@ -47,6 +47,8 @@ Each item in the options object is optional. Any that are omitted will use the d
 | askForAttributes  | bool           | `false`            | If enabled, will prompt for attributes that will surround each item                                                                                                                        |
 | attributeList     | List of 3-List | `[]`               | A list of 3-list objects, formatted as `[name, attrFront, attrBack]`. The name will be displayed in the list, and the other two will wrap the object display name when formatted printing. |
 | defaultAttribute  | 3-List         | `['none', '', '']` | If an item is *not* queried for an attribute, this is used instead                                                                                                                         |
+| attributeName     | string         | `"attribute"`      | Modifies the display text when asking for attributes, "select an {attributeName} for ...".                                                                                                 |
+| attributeArticle  | string         | `"an"`             | Change the article of the attribute test. Default is 'the'                                                                                                                                                                                           |
 
 
 ### Per-Item Keys
