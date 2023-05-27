@@ -2,8 +2,8 @@
 tags: 2023/03-Mar
 alias: "ItemSelector"
 ---
-**Current Version:** 0.5  
-**Last Updated:** 2023-05-20  
+**Current Version:** 0.5.0  
+**Last Updated:** 2023-05-27  
 
 ## Usage
 `tp.user.ItemSelector.select(listDisp: string[], listData: string[] = listDisp, limit Number = Number.MAX_SAFE_INTEGER, options: Object = {})`
@@ -26,6 +26,7 @@ Once the selector has been run, you can access the following lists in the form `
 - `itemCountList`: A list containing the count of each item. If `askForCount` if false, each item has count 1.
 - `totalItemCount`: The sum of all item counts. If `askForCount` if false, will just return the total length of the list.
 - `itemAttributeList`: A list containing the attribute of each item. If `askForAttribute` is false, each item has the `defaultAttribute`.
+- `formattedDisp`: A list containing the name of each item wrapped with its attributes
 
 ## Options object
 Each item in the options object is optional. Any that are omitted will use the default value. Order does not matter.
@@ -264,4 +265,5 @@ initial
 	- `joinWithAttribute()` — Will output a string with the attributes wrapped around the items
 	- Default value is blank: `['none', '', '']` 
 
-
+### 0.5.1
+- Added `formattedDisp` — A list which contains the name of an item wrapped by the selected attributes

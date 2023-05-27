@@ -41,6 +41,8 @@ class ItemSelector {
 		this.selectedDisp = [];
 		this.selectedData = [];
 		
+		this.formattedDisp = [];
+		
 		this.itemCountList = []; // Contains the count for each selected item
 		this.itemAttributeList = []; // Contains the attributes for each selected item
 		this.totalItemCount = 0;
@@ -147,6 +149,7 @@ class ItemSelector {
 				const attrList = this.#getKeyOrDefault(itemData, 'attributeList');
 				const attrNames = attrList.map(k => k[0]);
 				
+				
 				// Check if there are any items in the attribute list
 				if (attrList.length > 0) {
 					attribute = await tp.system.suggester(attrNames, attrList, false, `Select an attribute for '${itemDisp}'`);
@@ -156,7 +159,7 @@ class ItemSelector {
 						attribute = this.#getKeyOrDefault(itemData, 'defaultAttribute');
 					}
 				} else {
-					new Notice(`There are no Attributes available for '${itemDisp}'\nPlease check your options`);
+					new Notice(`There are no attributes available for '${itemDisp}'\nPlease check your options`);
 					attribute = this.#getKeyOrDefault(itemData, 'defaultAttribute');
 				}
 				
@@ -170,6 +173,7 @@ class ItemSelector {
 			this.selectedData.push(itemData);
 			this.itemCountList.push(count);
 			this.itemAttributeList.push(attribute);
+			this.formattedDisp.push(attribute[1] + this.#getKeyOrDefault(itemData, 'name') + attribute[2]);
 			
 			// Break if limit reached
 			if (i >= this.limit) {
