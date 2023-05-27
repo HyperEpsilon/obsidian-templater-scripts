@@ -269,3 +269,4 @@ initial
 
 ### 0.5.1
 - Added `formattedDisp` — A list which contains the name of an item wrapped by the selected attributes
+- Added `attributeName` & `attributeArticle` for adjusting the attribute query text
