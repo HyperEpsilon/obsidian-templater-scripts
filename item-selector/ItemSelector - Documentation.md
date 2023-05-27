@@ -2,7 +2,7 @@
 tags: 2023/03-Mar
 alias: "ItemSelector"
 ---
-**Current Version:** 0.5.0  
+**Current Version:** 0.5.1  
 **Last Updated:** 2023-05-27  
 
 ## Usage
