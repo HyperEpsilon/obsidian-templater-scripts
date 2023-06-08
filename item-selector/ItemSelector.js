@@ -5,12 +5,10 @@
 */
 
 
-const tp = app.plugins.plugins['templater-obsidian'].templater.current_functions_object;
-
-
 class ItemSelector {
 	static #finishedPlaceholder = null;
 	static #otherPlaceholder = -1;
+	static #isInternalConstructing = false;
 	
 	#listUnique;
 	#defaultOptions = {
@@ -34,6 +32,12 @@ class ItemSelector {
 	
 	
 	constructor(listDisp, listData, limit, options) {
+		if (!ItemSelector.#isInternalConstructing) {
+			new Notice("ItemSelector is not constructable, use ItemSelector.select() instead")
+			throw new TypeError("ItemSelector is not constructable, use ItemSelector.select() instead");
+		}
+		ItemSelector.#isInternalConstructing = false;
+		
 		this.unselectedDisp = [...listDisp];
 		this.unselectedData = [...listData];
 		this.#listUnique = Array.from({length: listData.length}, (_, i) => i + 1);
@@ -65,6 +69,7 @@ class ItemSelector {
 			limit = Number.MAX_SAFE_INTEGER;
 		}
 		
+		ItemSelector.#isInternalConstructing = true;
 		const selector = new ItemSelector(listDisp, listData, limit, options);
 		
 		await selector.#querySelection();
