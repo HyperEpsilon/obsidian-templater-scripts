@@ -1,5 +1,5 @@
 /*
-	Version: 0.5.0
+	Version: 0.5.2
 	Date: 2023-05-20
 	Author: Alex Nordstrom
 */

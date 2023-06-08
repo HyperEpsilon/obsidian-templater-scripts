@@ -2,8 +2,8 @@
 tags: 2023/03-Mar
 alias: "ItemSelector"
 ---
-**Current Version:** 0.5.1  
-**Last Updated:** 2023-05-27  
+**Current Version:** 0.5.2  
+**Last Updated:** 2023-06-08  
 
 ## Usage
 `tp.user.ItemSelector.select(listDisp: string[], listData: string[] = listDisp, limit Number = Number.MAX_SAFE_INTEGER, options: Object = {})`
@@ -270,3 +270,9 @@ initial
 ### 0.5.1
 - Added `formattedDisp` — A list which contains the name of an item wrapped by the selected attributes
 - Added `attributeName` & `attributeArticle` for adjusting the attribute query text
+
+### 0.5.2
+- Fixed bug where ItemSelector would cause a crash if used immediately after opening
+- Private constructor — throw error if attempting to use the constructor directly
+
+
