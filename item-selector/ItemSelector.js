@@ -10,6 +10,7 @@ class ItemSelector {
 	static #otherPlaceholder = -1;
 	static #isInternalConstructing = false;
 	
+	#tp;
 	#listUnique;
 	#defaultOptions = {
 		showFinished: true,
@@ -37,6 +38,8 @@ class ItemSelector {
 			throw new TypeError("ItemSelector is not constructable, use ItemSelector.select() instead");
 		}
 		ItemSelector.#isInternalConstructing = false;
+		
+		this.#tp = app.plugins.plugins['templater-obsidian'].templater.current_functions_object;
 		
 		this.unselectedDisp = [...listDisp];
 		this.unselectedData = [...listData];
@@ -107,7 +110,7 @@ class ItemSelector {
 			
 			// Case: 'other' item was slected and the user will be prompted for an input
 			if (item === ItemSelector.#otherPlaceholder) {
-				itemDisp = await tp.system.prompt(`Enter the name of ${itemTypeArticle}${this.#getIndexDisplay(i + iDisplayOffset)} ${itemType}`);
+				itemDisp = await this.#tp.system.prompt(`Enter the name of ${itemTypeArticle}${this.#getIndexDisplay(i + iDisplayOffset)} ${itemType}`);
 				itemData = itemDisp;
 			} 
 			// Case: A regular, non-control item was selected
@@ -136,7 +139,7 @@ class ItemSelector {
 				
 				// Loop until a valid number is entered, but 0 is the default
 				while (isInvalid) {
-					count = await tp.system.prompt(msg, 1);
+					count = await this.#tp.system.prompt(msg, 1);
 					if (count === null) {
 						count = 1
 						isInvalid = false;
@@ -160,7 +163,7 @@ class ItemSelector {
 				
 				// Check if there are any items in the attribute list
 				if (attrList.length > 0) {
-					attribute = await tp.system.suggester(attrNames, attrList, false, `Select ${attributeArticle} ${attributeName} for '${itemDisp}'`);
+					attribute = await this.#tp.system.suggester(attrNames, attrList, false, `Select ${attributeArticle} ${attributeName} for '${itemDisp}'`);
 					// Backup if the suggestor is canceled
 					if (attribute === null) {
 						new Notice(`Default ${attributeName} selected for '${itemDisp}'`);
@@ -254,7 +257,7 @@ class ItemSelector {
 		// 3 Cases, use i (and format), hide i, or use custom display (not yet implemented)
 		if (this.#getOptionOrDefault('countShown')) {
 			// TODO: Implement custom display
-			return " " + tp.user.formatOrdinal(i); // prepend a space because when count hidden, space shouldn't be visible
+			return " " + this.#tp.user.formatOrdinal(i); // prepend a space because when count hidden, space shouldn't be visible
 		} else {
 			return "";
 		}
@@ -268,7 +271,7 @@ class ItemSelector {
 	* @return {Object} 			       Returns the item selected by tp.system.suggester.
 	*/
 	async #queryItem(i, itemType, itemTypeArticle = "the") {
-		return tp.system.suggester(this.unselectedDisp, this.#listUnique, false, `Select ${itemTypeArticle}${this.#getIndexDisplay(i)} ${itemType}`);
+		return this.#tp.system.suggester(this.unselectedDisp, this.#listUnique, false, `Select ${itemTypeArticle}${this.#getIndexDisplay(i)} ${itemType}`);
 	}
 }
 
