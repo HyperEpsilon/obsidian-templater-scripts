@@ -5,8 +5,8 @@
 */
 
 class ItemSelector {
-  static #finishedPlaceholder = null;
-  static #otherPlaceholder = -1;
+  static #EXIT_PLACEHOLDER = null;
+  static #OTHER_PLACEHOLDER = -1;
   static #isInternalConstructing = false;
 
   #tp;
@@ -97,15 +97,15 @@ class ItemSelector {
     const showFinished = this.#getOptionOrDefault("showFinished");
     if (showFinished) {
       this.unselectedDisp.unshift(this.#getOptionOrDefault("finishedName"));
-      this.unselectedData.unshift(ItemSelector.#finishedPlaceholder);
-      this.#listUnique.unshift(ItemSelector.#finishedPlaceholder);
+      this.unselectedData.unshift(ItemSelector.#EXIT_PLACEHOLDER);
+      this.#listUnique.unshift(ItemSelector.#EXIT_PLACEHOLDER);
     }
 
     // If showOther, then add the '== Other ==' option
     const showOther = this.#getOptionOrDefault("showOther");
     if (showOther) {
       this.unselectedDisp.push(this.#getOptionOrDefault("otherName"));
-      this.#listUnique.push(ItemSelector.#otherPlaceholder);
+      this.#listUnique.push(ItemSelector.#OTHER_PLACEHOLDER);
     }
 
     // Set up configuration options
@@ -125,7 +125,7 @@ class ItemSelector {
       let itemData;
 
       // Case: 'other' item was slected and the user will be prompted for an input
-      if (item === ItemSelector.#otherPlaceholder) {
+      if (item === ItemSelector.#OTHER_PLACEHOLDER) {
         itemDisp = await this.#tp.system.prompt(
           `Enter the name of ${itemTypeArticle}${this.#getIndexDisplay(i + iDisplayOffset)} ${itemType}`,
         );
