@@ -72,7 +72,7 @@ class ItemSelector {
    * This is how the selector needs to be called
    * @param {Array} listDisp A list of strings that will be displayed for each item in the Suggester prompt
    * @param {Array} listData A list of objects that will be selected from. Must be the same length as listDisp. Can be strings or objects with additional parameters
-   * @param {Number} limit The maximum number of items selected. Does not enforce a minimum
+   * @param {Number} limit The maximum number of items selected. Does not enforce a minimum. 0 is treated as no limit
    * @param {Object} options A single object that contains all customization parameters (see documentation file)
    * @returns An ItemSelector object with all selection choices made available as lists
    */
@@ -89,8 +89,12 @@ class ItemSelector {
       );
     }
 
-    if (limit <= 0 || typeof limit !== "number") {
+    if (limit === 0) {
       limit = Number.MAX_SAFE_INTEGER;
+    } else if (limit < 0 || typeof limit !== "number") {
+      throw new TypeError(
+        "limit is not a valid number. limit must either be 0 (no limit) or greater than 0",
+      );
     }
 
     ItemSelector.#isInternalConstructing = true;
