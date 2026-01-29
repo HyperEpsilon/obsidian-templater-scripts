@@ -10,7 +10,7 @@ class ItemSelector {
   static #isInternalConstructing = false;
 
   #tp;
-  #listUnique;
+  #listIndex;
   #defaultOptions = {
     showFinished: true,
     finishedName: "== Done ==",
@@ -30,6 +30,7 @@ class ItemSelector {
     attributeArticle: "an",
   };
 
+  // private constructor. Class should be invoked via ItemSelector.select()
   constructor(listDisp, listData, limit, options) {
     if (!ItemSelector.#isInternalConstructing) {
       new Notice(
@@ -41,24 +42,25 @@ class ItemSelector {
     }
     ItemSelector.#isInternalConstructing = false;
 
+    // set up access to parent Templater plugin
     this.#tp =
       app.plugins.plugins[
         "templater-obsidian"
       ].templater.current_functions_object;
 
+    // inputs
     this.unselectedDisp = [...listDisp];
     this.unselectedData = [...listData];
-    this.#listUnique = Array.from({ length: listData.length }, (_, i) => i + 1);
+    this.#listIndex = Array.from({ length: listData.length }, (_, i) => i + 1); // A list of integers used to uniquely select an item from the list. Basically, a list of indexes
     this.limit = limit;
     this.options = options;
 
+    // outputs
     this.selectedDisp = [];
     this.selectedData = [];
-
-    this.formattedDisp = [];
-
     this.itemCountList = []; // Contains the count for each selected item
-    this.itemAttributeList = []; // Contains the attributes for each selected item
+    this.itemAttributeList = []; // Contains the attribute for each selected item
+    this.formattedDisp = []; // List of items wrapped with the selected attributes
     this.totalItemCount = 0;
 
     // Save originals
@@ -66,7 +68,14 @@ class ItemSelector {
     this.originalData = [...listData];
   }
 
-  // This is how the class needs to be called
+  /**
+   * This is how the selector needs to be called
+   * @param {Array} listDisp A list of strings that will be displayed for each item in the Suggester prompt
+   * @param {Array} listData A list of objects that will be selected from. Must be the same length as listDisp. Can be strings or objects with additional parameters
+   * @param {Number} limit The maximum number of items selected. Does not enforce a minimum
+   * @param {Object} options A single object that contains all customization parameters (see documentation file)
+   * @returns An ItemSelector object with all selection choices made available as lists
+   */
   static async select(
     listDisp,
     listData = listDisp,
@@ -93,19 +102,19 @@ class ItemSelector {
   }
 
   async #querySelection() {
-    // If showFinished, then add the '== Done ==' option
+    // If showFinished, then add the '== Done ==' option to the beginning of the selection lists
     const showFinished = this.#getOptionOrDefault("showFinished");
     if (showFinished) {
       this.unselectedDisp.unshift(this.#getOptionOrDefault("finishedName"));
       this.unselectedData.unshift(ItemSelector.#EXIT_PLACEHOLDER);
-      this.#listUnique.unshift(ItemSelector.#EXIT_PLACEHOLDER);
+      this.#listIndex.unshift(ItemSelector.#EXIT_PLACEHOLDER);
     }
 
-    // If showOther, then add the '== Other ==' option
+    // If showOther, then add the '== Other ==' option to the end of the selection lists
     const showOther = this.#getOptionOrDefault("showOther");
     if (showOther) {
       this.unselectedDisp.push(this.#getOptionOrDefault("otherName"));
-      this.#listUnique.push(ItemSelector.#OTHER_PLACEHOLDER);
+      this.#listIndex.push(ItemSelector.#OTHER_PLACEHOLDER);
     }
 
     // Set up configuration options
@@ -124,7 +133,7 @@ class ItemSelector {
       let itemDisp;
       let itemData;
 
-      // Case: 'other' item was slected and the user will be prompted for an input
+      // Case: 'other' item was selected and the user will be prompted for an input
       if (item === ItemSelector.#OTHER_PLACEHOLDER) {
         itemDisp = await this.#tp.system.prompt(
           `Enter the name of ${itemTypeArticle}${this.#getIndexDisplay(i + iDisplayOffset)} ${itemType}`,
@@ -134,17 +143,17 @@ class ItemSelector {
       // Case: A regular, non-control item was selected
       else {
         // Get index of selected item
-        let j = this.#listUnique.indexOf(item);
+        let j = this.#listIndex.indexOf(item);
         if (j >= 0) {
           itemDisp = this.unselectedDisp[j];
           itemData = this.unselectedData[j];
           let keepItem = this.#getKeyOrDefault(itemData, "keepWhenSelected");
 
-          // Remove the selected item if specific$keepWhenSelected or globabl$keepSelectedItems is false
+          // Remove the selected item if specific$keepWhenSelected or global$keepSelectedItems is false
           if (!keepItem) {
             this.unselectedDisp.splice(j, 1);
             this.unselectedData.splice(j, 1);
-            this.#listUnique.splice(j, 1);
+            this.#listIndex.splice(j, 1);
           }
         }
       }
@@ -187,14 +196,14 @@ class ItemSelector {
             false,
             `Select ${attributeArticle} ${attributeName} for '${itemDisp}'`,
           );
-          // Backup if the suggestor is canceled
+          // Backup if the suggester is canceled
           if (attribute === null) {
             new Notice(`Default ${attributeName} selected for '${itemDisp}'`);
             attribute = this.#getKeyOrDefault(itemData, "defaultAttribute");
           }
         } else {
           new Notice(
-            `There are no {attributeName}s available for '${itemDisp}'\nPlease check your options`,
+            `There are no ${attributeName}s available for '${itemDisp}'\nPlease check your options`,
           );
           attribute = this.#getKeyOrDefault(itemData, "defaultAttribute");
         }
@@ -211,7 +220,7 @@ class ItemSelector {
         attribute[1] + this.#getKeyOrDefault(itemData, "name") + attribute[2],
       );
 
-      // Break if limit reached
+      // break if enough items have been selected
       if (i >= this.limit) {
         break;
       }
@@ -223,21 +232,25 @@ class ItemSelector {
       );
     }
 
+    // Cleanup
     this.totalItemCount = this.itemCountList.reduce(
       (partialSum, a) => partialSum + a,
       0,
     );
 
+    // Remove the '== Done ==' option from the front of the lists
     if (showFinished) {
       this.unselectedDisp.shift();
       this.unselectedData.shift();
     }
 
+    // Remove the '== Other ==' option from the back of the list
     if (showOther) {
       this.unselectedDisp.pop();
     }
   }
 
+  // function called after the selector has run to output a formatted string with item counts
   joinWithCount(sep = ", ", outFormat = (count, name) => `${count}x ${name}`) {
     let cardCountList = [];
     for (let i = 0; i < this.selectedData.length; ++i) {
@@ -250,6 +263,7 @@ class ItemSelector {
     return cardCountList.join(sep);
   }
 
+  // function called after the selector has run to output a formatted string with items wrapped by their attributes
   joinWithAttribute(
     sep = ", ",
     outFormat = (count, name, attribute) =>
@@ -316,15 +330,15 @@ class ItemSelector {
 
   /**
    * Helper function for invoking the Templater Suggester
-   * @param  {Number} i		       The number of the item.
+   * @param  {Number} i               The number of the item.
    * @param  {String} itemType        The type of the item being queried.
    * @param  {String} itemTypeArticle The article that prefixes the # in the selector
-   * @return {Object} 			       Returns the item selected by tp.system.suggester.
+   * @return {Object}                 Returns the item selected by tp.system.suggester.
    */
   async #queryItem(i, itemType, itemTypeArticle = "the") {
     return this.#tp.system.suggester(
       this.unselectedDisp,
-      this.#listUnique,
+      this.#listIndex,
       false,
       `Select ${itemTypeArticle}${this.#getIndexDisplay(i)} ${itemType}`,
     );
