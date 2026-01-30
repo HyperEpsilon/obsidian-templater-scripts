@@ -129,18 +129,17 @@ class ItemSelector {
       this.#listIndex.push(ItemSelector.#OTHER_PLACEHOLDER);
     }
 
-    // Set up configuration options
-    const itemType = this.options.itemType;
-    const itemTypeArticle = this.options.itemTypeArticle;
-    const countName = this.options.countName;
-
     while (this.selectedData.length < this.limit) {
       let itemDisp;
       let itemData;
       let displayCount =
         this.selectedData.length + 1 + this.options.countOffset;
 
-      let item = await this.#queryItem(displayCount, itemType, itemTypeArticle);
+      let item = await this.#queryItem(
+        displayCount,
+        this.options.itemType,
+        this.options.itemTypeArticle,
+      );
 
       // Case: EXIT. If the user selects the EXIT_PLACEHOLDER or if the selector is canceled, null is returned.
       if (item === null) {
@@ -150,7 +149,7 @@ class ItemSelector {
       // Case: 'other' item was selected and the user will be prompted for an input
       if (item === ItemSelector.#OTHER_PLACEHOLDER) {
         itemDisp = await this.#tp.system.prompt(
-          `Enter the name of ${itemTypeArticle}${this.#getIndexDisplay(displayCount)} ${itemType}`,
+          `Enter the name of ${this.options.itemTypeArticle}${this.#getIndexDisplay(displayCount)} ${this.options.itemType}`,
         );
         itemData = itemDisp;
       }
@@ -176,7 +175,7 @@ class ItemSelector {
       let count;
       if (this.#getKeyOrDefault(itemData, "askForCount")) {
         let isInvalid = true;
-        let msg = `Enter the number of ${countName} of '${itemDisp}'`;
+        let msg = `Enter the number of ${this.options.countName} of '${itemDisp}'`;
 
         // Loop until a valid number is entered, but 0 is the default
         while (isInvalid) {
@@ -187,7 +186,7 @@ class ItemSelector {
           } else {
             count = Number.parseInt(count);
             isInvalid = isNaN(count);
-            msg = `Enter the number of ${countName} of '${itemDisp}' | Please enter a valid value`;
+            msg = `Enter the number of ${this.options.countName} of '${itemDisp}' | Please enter a valid value`;
           }
         }
       } else {
