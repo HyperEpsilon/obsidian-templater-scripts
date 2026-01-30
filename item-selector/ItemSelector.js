@@ -114,7 +114,7 @@ class ItemSelector {
   }
 
   async #querySelection() {
-    // If showFinished, then add the '== Done ==' option to the beginning of the selection lists
+    // If showFinished, then add the EXIT_PLACEHOLDER ('== Done ==') option to the beginning of the selection lists
     const showFinished = this.options.showFinished;
     if (showFinished) {
       this.unselectedDisp.unshift(this.options.finishedName);
@@ -122,7 +122,7 @@ class ItemSelector {
       this.#listIndex.unshift(ItemSelector.#EXIT_PLACEHOLDER);
     }
 
-    // If showOther, then add the '== Other ==' option to the end of the selection lists
+    // If showOther, then add the OTHER_PLACEHOLDER ('== Other ==') option to the end of the selection lists
     const showOther = this.options.showOther;
     if (showOther) {
       this.unselectedDisp.push(this.options.otherName);
@@ -134,21 +134,23 @@ class ItemSelector {
     const itemTypeArticle = this.options.itemTypeArticle;
     const countName = this.options.countName;
 
-    let iDisplayOffset = this.options.countOffset;
-    let i = 0;
-    let item = await this.#queryItem(
-      ++i + iDisplayOffset,
-      itemType,
-      itemTypeArticle,
-    );
-    while (item) {
+    while (this.selectedData.length < this.limit) {
       let itemDisp;
       let itemData;
+      let displayCount =
+        this.selectedData.length + 1 + this.options.countOffset;
+
+      let item = await this.#queryItem(displayCount, itemType, itemTypeArticle);
+
+      // Case: EXIT. If the user selects the EXIT_PLACEHOLDER or if the selector is canceled, null is returned.
+      if (item === null) {
+        break;
+      }
 
       // Case: 'other' item was selected and the user will be prompted for an input
       if (item === ItemSelector.#OTHER_PLACEHOLDER) {
         itemDisp = await this.#tp.system.prompt(
-          `Enter the name of ${itemTypeArticle}${this.#getIndexDisplay(i + iDisplayOffset)} ${itemType}`,
+          `Enter the name of ${itemTypeArticle}${this.#getIndexDisplay(displayCount)} ${itemType}`,
         );
         itemData = itemDisp;
       }
@@ -230,17 +232,6 @@ class ItemSelector {
       this.itemAttributeList.push(attribute);
       this.formattedDisp.push(
         attribute[1] + this.#getKeyOrDefault(itemData, "name") + attribute[2],
-      );
-
-      // break if enough items have been selected
-      if (i >= this.limit) {
-        break;
-      }
-
-      item = await this.#queryItem(
-        ++i + iDisplayOffset,
-        itemType,
-        itemTypeArticle,
       );
     }
 
