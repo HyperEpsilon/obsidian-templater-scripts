@@ -305,11 +305,11 @@ class ItemSelector {
     return itemData.hasOwnProperty(key) ? itemData[key] : this.options[key];
   }
 
-  #getIndexDisplay(i) {
-    // 3 Cases, use i (and format), hide i, or use custom display (not yet implemented)
+  #getIndexDisplay(position) {
+    // 3 Cases, use position (and format), hide position, or use custom display (not yet implemented)
     if (this.options.countShown) {
       // TODO: Implement custom display
-      return " " + this.#tp.user.formatOrdinal(i); // prepend a space because when count hidden, space shouldn't be visible
+      return " " + this.#tp.user.formatOrdinal(position); // prepend a space because when count hidden, space shouldn't be visible
     } else {
       return "";
     }
@@ -317,17 +317,17 @@ class ItemSelector {
 
   /**
    * Helper function for invoking the Templater Suggester
-   * @param  {Number} i               The number of the item.
+   * @param  {Number} position               The number of the item.
    * @param  {String} itemType        The type of the item being queried.
    * @param  {String} itemTypeArticle The article that prefixes the # in the selector
    * @return {Object}                 Returns the item selected by tp.system.suggester.
    */
-  async #queryItem(i, itemType, itemTypeArticle = "the") {
+  async #queryItem(position, itemType, itemTypeArticle = "the") {
     return this.#tp.system.suggester(
       this.unselectedDisp,
       this.#listIndex,
       false,
-      `Select ${itemTypeArticle}${this.#getIndexDisplay(i)} ${itemType}`,
+      `Select ${itemTypeArticle}${this.#getIndexDisplay(position)} ${itemType}`,
     );
   }
 }
