@@ -53,7 +53,7 @@ class ItemSelector {
     this.unselectedData = [...listData];
     this.#listIndex = Array.from({ length: listData.length }, (_, i) => i + 1); // A list of integers used to uniquely select an item from the list. Basically, a list of indexes
     this.limit = limit;
-    this.options = options;
+    this.options = this.#constructOptions(options);
 
     // outputs
     this.selectedDisp = [];
@@ -66,6 +66,14 @@ class ItemSelector {
     // Save originals
     this.originalDisp = [...listDisp];
     this.originalData = [...listData];
+  }
+
+  // Override the default options with options passed by the user
+  #constructOptions(options) {
+    for (const [key, value] of Object.entries(options)) {
+      this.#defaultOptions[key] = value;
+    }
+    return this.#defaultOptions;
   }
 
   /**
@@ -107,26 +115,26 @@ class ItemSelector {
 
   async #querySelection() {
     // If showFinished, then add the '== Done ==' option to the beginning of the selection lists
-    const showFinished = this.#getOptionOrDefault("showFinished");
+    const showFinished = this.options.showFinished;
     if (showFinished) {
-      this.unselectedDisp.unshift(this.#getOptionOrDefault("finishedName"));
+      this.unselectedDisp.unshift(this.options.finishedName);
       this.unselectedData.unshift(ItemSelector.#EXIT_PLACEHOLDER);
       this.#listIndex.unshift(ItemSelector.#EXIT_PLACEHOLDER);
     }
 
     // If showOther, then add the '== Other ==' option to the end of the selection lists
-    const showOther = this.#getOptionOrDefault("showOther");
+    const showOther = this.options.showOther;
     if (showOther) {
-      this.unselectedDisp.push(this.#getOptionOrDefault("otherName"));
+      this.unselectedDisp.push(this.options.otherName);
       this.#listIndex.push(ItemSelector.#OTHER_PLACEHOLDER);
     }
 
     // Set up configuration options
-    const itemType = this.#getOptionOrDefault("itemType");
-    const itemTypeArticle = this.#getOptionOrDefault("itemTypeArticle");
-    const countName = this.#getOptionOrDefault("countName");
+    const itemType = this.options.itemType;
+    const itemTypeArticle = this.options.itemTypeArticle;
+    const countName = this.options.countName;
 
-    let iDisplayOffset = this.#getOptionOrDefault("countOffset");
+    let iDisplayOffset = this.options.countOffset;
     let i = 0;
     let item = await this.#queryItem(
       ++i + iDisplayOffset,
@@ -189,8 +197,8 @@ class ItemSelector {
       if (this.#getKeyOrDefault(itemData, "askForAttributes")) {
         const attrList = this.#getKeyOrDefault(itemData, "attributeList");
         const attrNames = attrList.map((k) => k[0]);
-        const attributeName = this.#getOptionOrDefault("attributeName");
-        const attributeArticle = this.#getOptionOrDefault("attributeArticle");
+        const attributeName = this.options.attributeName;
+        const attributeArticle = this.options.attributeArticle;
 
         // Check if there are any items in the attribute list
         if (attrList.length > 0) {
@@ -285,12 +293,6 @@ class ItemSelector {
     return outCardList.join(sep);
   }
 
-  #getOptionOrDefault(opt) {
-    return this.options.hasOwnProperty(opt)
-      ? this.options[opt]
-      : this.#defaultOptions[opt];
-  }
-
   #getKeyOrDefault(itemData, key) {
     switch (key) {
       case "name":
@@ -302,29 +304,29 @@ class ItemSelector {
       case "keepWhenSelected":
         return itemData.hasOwnProperty(key)
           ? itemData.keepWhenSelected
-          : this.#getOptionOrDefault("keepSelectedItems");
+          : this.options.keepSelectedItems;
       case "askForCount":
         return itemData.hasOwnProperty(key)
           ? itemData.askForCount
-          : this.#getOptionOrDefault("askForCount");
+          : this.options.askForCount;
       case "askForAttributes":
         return itemData.hasOwnProperty(key)
           ? itemData.askForAttributes
-          : this.#getOptionOrDefault("askForAttributes");
+          : this.options.askForAttributes;
       case "attributeList":
         return itemData.hasOwnProperty(key)
           ? itemData.attributeList
-          : this.#getOptionOrDefault("attributeList");
+          : this.options.attributeList;
       case "defaultAttribute":
         return itemData.hasOwnProperty(key)
           ? itemData.defaultAttribute
-          : this.#getOptionOrDefault("defaultAttribute");
+          : this.options.defaultAttribute;
     }
   }
 
   #getIndexDisplay(i) {
     // 3 Cases, use i (and format), hide i, or use custom display (not yet implemented)
-    if (this.#getOptionOrDefault("countShown")) {
+    if (this.options.countShown) {
       // TODO: Implement custom display
       return " " + this.#tp.user.formatOrdinal(i); // prepend a space because when count hidden, space shouldn't be visible
     } else {
