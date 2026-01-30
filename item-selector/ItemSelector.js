@@ -63,7 +63,7 @@ class ItemSelector {
     this.formattedDisp = []; // List of items wrapped with the selected attributes
     this.totalItemCount = 0;
 
-    // Save originals
+    // Save originals (output)
     this.originalDisp = [...listDisp];
     this.originalData = [...listData];
   }
@@ -293,35 +293,25 @@ class ItemSelector {
     return outCardList.join(sep);
   }
 
+  // Gets the per-item-key value for an option if defined, or passes global option if not
   #getKeyOrDefault(itemData, key) {
-    switch (key) {
-      case "name":
-        return itemData.hasOwnProperty(key)
-          ? itemData.name
-          : Array.isArray(itemData)
-            ? itemData[0]
-            : itemData;
-      case "keepWhenSelected":
-        return itemData.hasOwnProperty(key)
-          ? itemData.keepWhenSelected
-          : this.options.keepSelectedItems;
-      case "askForCount":
-        return itemData.hasOwnProperty(key)
-          ? itemData.askForCount
-          : this.options.askForCount;
-      case "askForAttributes":
-        return itemData.hasOwnProperty(key)
-          ? itemData.askForAttributes
-          : this.options.askForAttributes;
-      case "attributeList":
-        return itemData.hasOwnProperty(key)
-          ? itemData.attributeList
-          : this.options.attributeList;
-      case "defaultAttribute":
-        return itemData.hasOwnProperty(key)
-          ? itemData.defaultAttribute
-          : this.options.defaultAttribute;
+    // Special case for "name" as name could be stored in multiple ways
+    if (key === "name") {
+      return itemData.hasOwnProperty(key)
+        ? itemData.name
+        : Array.isArray(itemData)
+          ? itemData[0]
+          : itemData;
+    } else if (key === "keepWhenSelected") {
+      // Separate case because per-item-key (keepWhenSelected) does not match global option (keepSelectedItems)
+      // Kept this way to not break legacy implementations
+      return itemData.hasOwnProperty(key)
+        ? itemData.keepWhenSelected
+        : this.options.keepSelectedItems;
     }
+
+    // Default case
+    return itemData.hasOwnProperty(key) ? itemData[key] : this.options[key];
   }
 
   #getIndexDisplay(i) {
