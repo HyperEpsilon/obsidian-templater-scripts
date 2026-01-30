@@ -171,58 +171,11 @@ class ItemSelector {
         }
       }
 
-      // Get the count of the item, default 1
-      let count;
-      if (this.#getKeyOrDefault(itemData, "askForCount")) {
-        let isInvalid = true;
-        let msg = `Enter the number of ${this.options.countName} of '${itemDisp}'`;
+      // Get the count of the item, if any. default 1
+      let count = await this.#queryItemCount(itemData, itemDisp);
 
-        // Loop until a valid number is entered, but 0 is the default
-        while (isInvalid) {
-          count = await this.#tp.system.prompt(msg, 1);
-          if (count === null) {
-            count = 1;
-            isInvalid = false;
-          } else {
-            count = Number.parseInt(count);
-            isInvalid = isNaN(count);
-            msg = `Enter the number of ${this.options.countName} of '${itemDisp}' | Please enter a valid value`;
-          }
-        }
-      } else {
-        count = 1;
-      }
-
-      // Get the attribute of the item
-      let attribute;
-      if (this.#getKeyOrDefault(itemData, "askForAttributes")) {
-        const attrList = this.#getKeyOrDefault(itemData, "attributeList");
-        const attrNames = attrList.map((k) => k[0]);
-        const attributeName = this.options.attributeName;
-        const attributeArticle = this.options.attributeArticle;
-
-        // Check if there are any items in the attribute list
-        if (attrList.length > 0) {
-          attribute = await this.#tp.system.suggester(
-            attrNames,
-            attrList,
-            false,
-            `Select ${attributeArticle} ${attributeName} for '${itemDisp}'`,
-          );
-          // Backup if the suggester is canceled
-          if (attribute === null) {
-            new Notice(`Default ${attributeName} selected for '${itemDisp}'`);
-            attribute = this.#getKeyOrDefault(itemData, "defaultAttribute");
-          }
-        } else {
-          new Notice(
-            `There are no ${attributeName}s available for '${itemDisp}'\nPlease check your options`,
-          );
-          attribute = this.#getKeyOrDefault(itemData, "defaultAttribute");
-        }
-      } else {
-        attribute = this.#getKeyOrDefault(itemData, "defaultAttribute");
-      }
+      // Get the attribute of the item, if any. default blank string
+      let attribute = await this.#queryItemAttribute(itemData, itemDisp);
 
       // Add the selected item to the output list
       this.selectedDisp.push(itemDisp);
@@ -234,7 +187,7 @@ class ItemSelector {
       );
     }
 
-    // Cleanup
+    // Loop finished. Cleanup
     this.totalItemCount = this.itemCountList.reduce(
       (partialSum, a) => partialSum + a,
       0,
@@ -252,35 +205,62 @@ class ItemSelector {
     }
   }
 
-  // function called after the selector has run to output a formatted string with item counts
-  joinWithCount(sep = ", ", outFormat = (count, name) => `${count}x ${name}`) {
-    let cardCountList = [];
-    for (let i = 0; i < this.selectedData.length; ++i) {
-      const name = this.#getKeyOrDefault(this.selectedData[i], "name");
-      const count = this.itemCountList[i];
+  // Using the Templater prompt window, query the user for the count of an object
+  async #queryItemCount(itemData, itemDisp) {
+    let count;
+    if (this.#getKeyOrDefault(itemData, "askForCount")) {
+      let isInvalid = true;
+      let msg = `Enter the number of ${this.options.countName} of '${itemDisp}'`;
 
-      cardCountList.push(outFormat(count, name));
+      // Loop until a valid number is entered, but 0 is the default
+      while (isInvalid) {
+        count = await this.#tp.system.prompt(msg, 1);
+        if (count === null) {
+          count = 1;
+          isInvalid = false;
+        } else {
+          count = Number.parseInt(count);
+          isInvalid = isNaN(count);
+          msg = `Enter the number of ${this.options.countName} of '${itemDisp}' | Please enter a valid value`;
+        }
+      }
+    } else {
+      count = 1;
     }
-
-    return cardCountList.join(sep);
+    return count;
   }
 
-  // function called after the selector has run to output a formatted string with items wrapped by their attributes
-  joinWithAttribute(
-    sep = ", ",
-    outFormat = (count, name, attribute) =>
-      `${attribute[1]}${name}${attribute[2]}`,
-  ) {
-    let outCardList = [];
-    for (let i = 0; i < this.selectedData.length; ++i) {
-      const name = this.#getKeyOrDefault(this.selectedData[i], "name");
-      const count = this.itemCountList[i];
-      const attribute = this.itemAttributeList[i]; // Format is [NAME, FRONT_ATTR, BACK_ATTR]
+  // Query for an attribute that will ultimately be wrapped around the display object (bold, italics, etc.)
+  async #queryItemAttribute(itemData, itemDisp) {
+    let attribute = null;
+    if (this.#getKeyOrDefault(itemData, "askForAttributes")) {
+      const attrList = this.#getKeyOrDefault(itemData, "attributeList");
+      const attrNames = attrList.map((k) => k[0]);
+      const attributeName = this.options.attributeName;
+      const attributeArticle = this.options.attributeArticle;
 
-      outCardList.push(outFormat(count, name, attribute));
+      // Check if there are any items in the attribute list
+      if (attrList.length === 0) {
+        new Notice(
+          `There are no ${attributeName}s available for '${itemDisp}'\nPlease check your options`,
+        );
+      } else {
+        attribute = await this.#tp.system.suggester(
+          attrNames,
+          attrList,
+          false,
+          `Select ${attributeArticle} ${attributeName} for '${itemDisp}'`,
+        );
+        // Backup if the suggester is canceled
+        if (attribute === null) {
+          new Notice(`Default ${attributeName} selected for '${itemDisp}'`);
+        }
+      }
     }
-
-    return outCardList.join(sep);
+    if (attribute === null) {
+      attribute = this.#getKeyOrDefault(itemData, "defaultAttribute");
+    }
+    return attribute;
   }
 
   // Gets the per-item-key value for an option if defined, or passes global option if not
@@ -328,6 +308,37 @@ class ItemSelector {
       false,
       `Select ${itemTypeArticle}${this.#getIndexDisplay(position)} ${itemType}`,
     );
+  }
+
+  // function called after the selector has run to output a formatted string with item counts
+  joinWithCount(sep = ", ", outFormat = (count, name) => `${count}x ${name}`) {
+    let cardCountList = [];
+    for (let i = 0; i < this.selectedData.length; ++i) {
+      const name = this.#getKeyOrDefault(this.selectedData[i], "name");
+      const count = this.itemCountList[i];
+
+      cardCountList.push(outFormat(count, name));
+    }
+
+    return cardCountList.join(sep);
+  }
+
+  // function called after the selector has run to output a formatted string with items wrapped by their attributes
+  joinWithAttribute(
+    sep = ", ",
+    outFormat = (count, name, attribute) =>
+      `${attribute[1]}${name}${attribute[2]}`,
+  ) {
+    let outCardList = [];
+    for (let i = 0; i < this.selectedData.length; ++i) {
+      const name = this.#getKeyOrDefault(this.selectedData[i], "name");
+      const count = this.itemCountList[i];
+      const attribute = this.itemAttributeList[i]; // Format is [NAME, FRONT_ATTR, BACK_ATTR]
+
+      outCardList.push(outFormat(count, name, attribute));
+    }
+
+    return outCardList.join(sep);
   }
 }
 
